@@ -6,17 +6,11 @@
 /*   By: ynakamot <ynakamot@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/25 11:55:15 by ynakamot          #+#    #+#             */
-/*   Updated: 2020/11/03 15:32:53 by ynakamot         ###   ########.fr       */
+/*   Updated: 2020/11/07 08:19:05 by ynakamot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-
-void	safe_free(char **ptr)
-{
-	free(*ptr);
-	*ptr = NULL;
-}
 
 ssize_t	process_buf(char **line, char **buf)
 {
@@ -29,16 +23,16 @@ ssize_t	process_buf(char **line, char **buf)
 		return (ERROR);
 	if ((ptr = ft_strchr(tmp, '\n')))
 	{
-		safe_free(line);
+		SAFE_FREE(*line);
 		if (!(*line = ft_substr(tmp, 0, ptr - tmp)))
 			return (ERROR);
-		safe_free(buf);
+		SAFE_FREE(*buf);
 		if (!(*buf = ft_substr(tmp, ptr - tmp, ft_strlen(tmp))))
 			return (ERROR);
-		safe_free(&tmp);
+		SAFE_FREE(tmp);
 		return (SUCCESS);
 	}
-	safe_free(line);
+	SAFE_FREE(*line);
 	*line = tmp;
 	return (CONTINUE);
 }
@@ -55,14 +49,14 @@ ssize_t	creat_line(char **line, char **buf)
 		ptr = *line;
 		if (!(*line = ft_strjoin(*line, tmp)))
 			return (ERROR);
-		safe_free(&tmp);
-		safe_free(&ptr);
+		SAFE_FREE(tmp);
+		SAFE_FREE(ptr);
 		return (SUCCESS);
 	}
 	ptr = *line;
 	if (!(*line = ft_strjoin(*line, *buf)))
 		return (ERROR);
-	safe_free(&ptr);
+	SAFE_FREE(ptr);
 	return (CONTINUE);
 }
 
@@ -77,10 +71,8 @@ ssize_t	read_line(ssize_t fd, char **line, char **buf)
 			return (ERROR);
 		(*buf)[rc] = '\0';
 		ret = creat_line(line, buf);
-		if (ret == -1)
-			return (ERROR);
-		if (ret == 1)
-			return (SUCCESS);
+		if (ret == ERROR || ret == SUCCESS)
+			return (ret);
 	}
 	return (END);
 }
@@ -97,15 +89,13 @@ int		get_next_line(int fd, char **line)
 	ret = process_buf(line, &buf);
 	if (ret == CONTINUE)
 	{
-		safe_free(&buf);
+		SAFE_FREE(buf);
 		if (!(buf = malloc(sizeof(char) * BUFFER_SIZE + 1)))
 			return (ERROR);
 		ret = read_line(fd, line, &buf);
 	}
-	if (ret == -1)
-		return (ERROR);
-	if (ret == 1)
-		return (SUCCESS);
-	safe_free(&buf);
+	if (ret == ERROR || ret == SUCCESS)
+		return (ret);
+	SAFE_FREE(buf);
 	return (END);
 }
