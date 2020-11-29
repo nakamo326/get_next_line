@@ -6,7 +6,7 @@
 /*   By: ynakamot <ynakamot@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/25 11:32:00 by ynakamot          #+#    #+#             */
-/*   Updated: 2020/11/03 15:35:38 by ynakamot         ###   ########.fr       */
+/*   Updated: 2020/11/29 15:18:54 by ynakamot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 # define CONTINUE 3
 # define END 0
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 5
+#  define BUFFER_SIZE 32
 # endif
 # define SAFE_FREE(ptr) if(ptr != NULL){free(ptr); ptr = NULL;}
 
