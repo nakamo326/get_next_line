@@ -6,11 +6,17 @@
 /*   By: ynakamot <ynakamot@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/25 11:55:15 by ynakamot          #+#    #+#             */
-/*   Updated: 2020/11/07 08:19:05 by ynakamot         ###   ########.fr       */
+/*   Updated: 2021/01/20 10:18:22 by ynakamot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+
+void	safe_free(char **ptr)
+{
+	free(*ptr);
+	*ptr = NULL;
+}
 
 ssize_t	process_buf(char **line, char **buf)
 {
@@ -23,16 +29,16 @@ ssize_t	process_buf(char **line, char **buf)
 		return (ERROR);
 	if ((ptr = ft_strchr(tmp, '\n')))
 	{
-		SAFE_FREE(*line);
+		safe_free(line);
 		if (!(*line = ft_substr(tmp, 0, ptr - tmp)))
 			return (ERROR);
-		SAFE_FREE(*buf);
+		safe_free(buf);
 		if (!(*buf = ft_substr(tmp, ptr - tmp, ft_strlen(tmp))))
 			return (ERROR);
-		SAFE_FREE(tmp);
+		safe_free(&tmp);
 		return (SUCCESS);
 	}
-	SAFE_FREE(*line);
+	safe_free(line);
 	*line = tmp;
 	return (CONTINUE);
 }
@@ -49,14 +55,14 @@ ssize_t	creat_line(char **line, char **buf)
 		ptr = *line;
 		if (!(*line = ft_strjoin(*line, tmp)))
 			return (ERROR);
-		SAFE_FREE(tmp);
-		SAFE_FREE(ptr);
+		safe_free(&tmp);
+		safe_free(&ptr);
 		return (SUCCESS);
 	}
 	ptr = *line;
 	if (!(*line = ft_strjoin(*line, *buf)))
 		return (ERROR);
-	SAFE_FREE(ptr);
+	safe_free(&ptr);
 	return (CONTINUE);
 }
 
@@ -89,13 +95,13 @@ int		get_next_line(int fd, char **line)
 	ret = process_buf(line, &buf);
 	if (ret == CONTINUE)
 	{
-		SAFE_FREE(buf);
+		safe_free(&buf);
 		if (!(buf = malloc(sizeof(char) * BUFFER_SIZE + 1)))
 			return (ERROR);
 		ret = read_line(fd, line, &buf);
 	}
 	if (ret == ERROR || ret == SUCCESS)
 		return (ret);
-	SAFE_FREE(buf);
+	safe_free(&buf);
 	return (END);
 }

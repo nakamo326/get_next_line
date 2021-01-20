@@ -6,7 +6,7 @@
 /*   By: ynakamot <ynakamot@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/25 11:32:00 by ynakamot          #+#    #+#             */
-/*   Updated: 2020/11/29 15:18:54 by ynakamot         ###   ########.fr       */
+/*   Updated: 2021/01/20 10:20:41 by ynakamot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 32
 # endif
-# define SAFE_FREE(ptr) if(ptr != NULL){free(ptr); ptr = NULL;}
 
 size_t	ft_strlen(const char *s);
 char	*ft_strchr(const char *s, int c);
