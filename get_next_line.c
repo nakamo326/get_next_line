@@ -6,73 +6,82 @@
 /*   By: ynakamot <ynakamot@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/25 11:55:15 by ynakamot          #+#    #+#             */
-/*   Updated: 2021/01/20 10:18:22 by ynakamot         ###   ########.fr       */
+/*   Updated: 2021/04/21 09:00:12 by ynakamot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-void	safe_free(char **ptr)
+static void	safe_free(char **ptr)
 {
 	free(*ptr);
 	*ptr = NULL;
 }
 
-ssize_t	process_buf(char **line, char **buf)
+static ssize_t	process_buf(char **line, char **buf)
 {
 	char	*tmp;
 	char	*ptr;
 
-	if (!(ptr = ft_strchr(*buf, '\n')))
+	ptr = ft_strchr(*buf, '\n');
+	if (ptr == NULL)
 		return (CONTINUE);
-	if (!(tmp = ft_strdup(ptr + 1)))
+	*line = ft_strdup(ptr + 1);
+	if (*line == NULL)
 		return (ERROR);
-	if ((ptr = ft_strchr(tmp, '\n')))
-	{
-		safe_free(line);
-		if (!(*line = ft_substr(tmp, 0, ptr - tmp)))
-			return (ERROR);
-		safe_free(buf);
-		if (!(*buf = ft_substr(tmp, ptr - tmp, ft_strlen(tmp))))
-			return (ERROR);
-		safe_free(&tmp);
-		return (SUCCESS);
-	}
-	safe_free(line);
-	*line = tmp;
-	return (CONTINUE);
+	ptr = ft_strchr(*line, '\n');
+	if (ptr == NULL)
+		return (CONTINUE);
+	tmp = *line;
+	*line = ft_substr(tmp, 0, ptr - tmp);
+	if (*line == NULL)
+		return (ERROR);
+	safe_free(buf);
+	*buf = ft_substr(tmp, ptr - tmp, ft_strlen(tmp));
+	if (*buf == NULL)
+		return (ERROR);
+	safe_free(&tmp);
+	return (SUCCESS);
 }
 
-ssize_t	creat_line(char **line, char **buf)
+static ssize_t	creat_line(char **line, char **buf)
 {
-	char *tmp;
-	char *ptr;
+	char	*tmp;
+	char	*ptr;
 
-	if ((ptr = ft_strchr(*buf, '\n')))
+	ptr = ft_strchr(*buf, '\n');
+	if (ptr)
 	{
-		if (!(tmp = ft_substr(*buf, 0, ptr - *buf)))
+		tmp = ft_substr(*buf, 0, ptr - *buf);
+		if (tmp == NULL)
 			return (ERROR);
 		ptr = *line;
-		if (!(*line = ft_strjoin(*line, tmp)))
+		*line = ft_strjoin(*line, tmp);
+		if (*line == NULL)
 			return (ERROR);
 		safe_free(&tmp);
 		safe_free(&ptr);
 		return (SUCCESS);
 	}
 	ptr = *line;
-	if (!(*line = ft_strjoin(*line, *buf)))
+	*line = ft_strjoin(*line, *buf);
+	if (*line == NULL)
 		return (ERROR);
 	safe_free(&ptr);
 	return (CONTINUE);
 }
 
-ssize_t	read_line(ssize_t fd, char **line, char **buf)
+static ssize_t	read_line(ssize_t fd, char **line, char **buf)
 {
-	ssize_t rc;
-	ssize_t ret;
+	ssize_t	rc;
+	ssize_t	ret;
 
-	while ((rc = read(fd, *buf, BUFFER_SIZE)))
+	ret = CONTINUE;
+	while (ret == CONTINUE)
 	{
+		rc = read(fd, *buf, BUFFER_SIZE);
+		if (rc == 0)
+			break ;
 		if (rc == -1)
 			return (ERROR);
 		(*buf)[rc] = '\0';
@@ -83,20 +92,20 @@ ssize_t	read_line(ssize_t fd, char **line, char **buf)
 	return (END);
 }
 
-int		get_next_line(int fd, char **line)
+int	get_next_line(int fd, char **line)
 {
-	static char	*buf;
+	static char	*buf = NULL;
 	ssize_t		ret;
 
 	if (fd < 0 || !line || BUFFER_SIZE <= 0 || read(fd, buf, 0) < 0)
 		return (ERROR);
-	if (!(*line = ft_strdup("")))
-		return (ERROR);
+	*line = NULL;
 	ret = process_buf(line, &buf);
 	if (ret == CONTINUE)
 	{
 		safe_free(&buf);
-		if (!(buf = malloc(sizeof(char) * BUFFER_SIZE + 1)))
+		buf = malloc(sizeof(char) * BUFFER_SIZE + 1);
+		if (!buf)
 			return (ERROR);
 		ret = read_line(fd, line, &buf);
 	}
